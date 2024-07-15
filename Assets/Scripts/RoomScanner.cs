@@ -7,7 +7,9 @@ public class RoomScanner : MonoBehaviour
     public GameObject cube; // The cube prefab to instantiate
     public Material lineMaterial; // Material for the connecting lines
     public float snapThreshold = 0.5f; // Threshold distance for snapping
-    public OVRInput.Button interruptButton = OVRInput.Button.One; // Button to interrupt the current line
+    public OVRInput.Button placeCubeButton = OVRInput.Button.SecondaryIndexTrigger;
+    public OVRInput.Button deletePreviousButton = OVRInput.Button.SecondaryHandTrigger;
+    public OVRInput.Button interruptLineButton = OVRInput.Button.One; // Button to interrupt the current line
 
     private List<Vector3> points = new List<Vector3>(); // List to store points
     private List<GameObject> placedCubes = new List<GameObject>(); // List to store placed cube instances
@@ -22,7 +24,7 @@ public class RoomScanner : MonoBehaviour
 
     void Update()
     {
-        if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
+        if (OVRInput.GetDown(placeCubeButton))
         {
             Debug.Log("Res: Trigger point");
             RaycastHit hit;
@@ -41,11 +43,11 @@ public class RoomScanner : MonoBehaviour
                 }
             }
         } 
-        else if (OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
+        else if (OVRInput.GetDown(deletePreviousButton))
         {
             RemoveLastPoint();
         }
-        else if (OVRInput.GetDown(interruptButton))
+        else if (OVRInput.GetDown(interruptLineButton))
         {
             CreateNewLineRenderer();
         }
