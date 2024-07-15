@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,27 +7,28 @@ public class RoomScanner : MonoBehaviour
     public GameObject cube; // The cube prefab to instantiate
     public Material lineMaterial; // Material for the connecting lines
     public float snapThreshold = 0.5f; // Threshold distance for snapping
+    public OVRInput.Button interruptButton = OVRInput.Button.One; // Button to interrupt the current line
 
     private List<Vector3> points = new List<Vector3>(); // List to store points
     private List<GameObject> placedCubes = new List<GameObject>(); // List to store placed cube instances
-    private LineRenderer lineRenderer; // LineRenderer to draw connecting lines
+    private List<LineRenderer> lineRenderers = new List<LineRenderer>(); // List to store line renderers
+
+    private LineRenderer currentLineRenderer; // Current line renderer
 
     void Start()
     {
-        lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.material = lineMaterial;
-        lineRenderer.startWidth = 0.02f;
-        lineRenderer.endWidth = 0.02f;
-        lineRenderer.positionCount = 0;
+        CreateNewLineRenderer();
     }
 
     void Update()
     {
         if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger))
         {
+            Debug.Log("Res: Trigger point");
             RaycastHit hit;
             if (Physics.Raycast(origin.position, origin.forward, out hit) && hit.transform.name == "Plane")
             {
+                Debug.Log("Res: Hit plane");
                 Vector3 hitPoint = hit.point;
 
                 // Check for snapping
@@ -40,9 +40,14 @@ public class RoomScanner : MonoBehaviour
                     PlacePoint(snappedPoint);
                 }
             }
-        } else if (OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
+        } 
+        else if (OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger))
         {
             RemoveLastPoint();
+        }
+        else if (OVRInput.GetDown(interruptButton))
+        {
+            CreateNewLineRenderer();
         }
     }
 
@@ -60,14 +65,13 @@ public class RoomScanner : MonoBehaviour
 
     void PlacePoint(Vector3 hitPoint)
     {
-        //Instantiate(cube, hitPoint, Quaternion.identity);
         GameObject newCube = Instantiate(cube, hitPoint, Quaternion.identity); // Create a new cube
         points.Add(hitPoint);
         placedCubes.Add(newCube);
 
-        // Update the line renderer with the new point
-        lineRenderer.positionCount = points.Count;
-        lineRenderer.SetPositions(points.ToArray());
+        // Update the current line renderer with the new point
+        currentLineRenderer.positionCount = points.Count;
+        currentLineRenderer.SetPositions(points.ToArray());
     }
 
     void RemoveLastPoint()
@@ -81,10 +85,23 @@ public class RoomScanner : MonoBehaviour
             Destroy(lastCube);
             placedCubes.RemoveAt(placedCubes.Count - 1);
 
-            // Update the line renderer
-            lineRenderer.positionCount = points.Count;
-            lineRenderer.SetPositions(points.ToArray());
+            // Update the current line renderer
+            currentLineRenderer.positionCount = points.Count;
+            currentLineRenderer.SetPositions(points.ToArray());
             Debug.Log("Removed the last point");
         }
+    }
+
+    void CreateNewLineRenderer()
+    {
+        currentLineRenderer = new GameObject("LineRenderer").AddComponent<LineRenderer>();
+        currentLineRenderer.material = lineMaterial;
+        currentLineRenderer.startWidth = 0.02f;
+        currentLineRenderer.endWidth = 0.02f;
+        currentLineRenderer.positionCount = 0;
+        lineRenderers.Add(currentLineRenderer);
+
+        // Clear points list to start a new line segment
+        points.Clear();
     }
 }
