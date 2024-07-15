@@ -1227,7 +1227,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 39.6, y: 83.7}
+  m_AnchoredPosition: {x: 30.544998, y: 83.09998}
   m_SizeDelta: {x: 171.92, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &487324548
@@ -1546,7 +1546,7 @@ Transform:
   m_GameObject: {fileID: 730769970}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.059140302, y: 0.33241367, z: -3.0616636}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1566,9 +1566,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   origin: {fileID: 1489240115}
   cube: {fileID: 1371648702880568446, guid: 2b23494ae56766e44b91f2b51310b3d4, type: 3}
+  wallPrefab: {fileID: 7851760017034652085, guid: d440bc565f1d47e41878351c8b8bad34,
+    type: 3}
   lineMaterial: {fileID: 2100000, guid: 3936d8a565e631f459dd82feb27e3cef, type: 2}
+  mapLineMaterial: {fileID: 2100000, guid: 98dfdaeb7c8c7e44e8ae164ed15ff42f, type: 2}
   snapThreshold: 0.5
-  interruptButton: 1
+  placeCubeButton: 2097152
+  deletePreviousButton: 4194304
+  interruptLineButton: 1
 --- !u!114 &730769974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3712,7 +3717,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &1546513617
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -3942,7 +3947,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -7.345, y: 114.4}
+  m_AnchoredPosition: {x: -16.4, y: 113.8}
   m_SizeDelta: {x: 78.03, y: 21.11}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1605832083
@@ -4575,8 +4580,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 236.4, y: 83.7}
-  m_SizeDelta: {x: 197.25, y: 50}
+  m_AnchoredPosition: {x: 234.7, y: 83.7}
+  m_SizeDelta: {x: 200.65, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
