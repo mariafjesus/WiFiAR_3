@@ -11,9 +11,36 @@ public class WifiStrength : MonoBehaviour
     private AndroidJavaObject context;
 
     public UpdateDataScreen updateDataScreen;
+
+    // Strength
+    public int Strength { get; private set; }
+    public int MaxStrength { get; private set; }
+    public int MinStrength { get; private set; }
+    public float AvgStrength { get; private set; }
+    private int totalStrength = 0;
+    private int totalStrengthCount = 0;
+
+    // Speed
+    public float Speed { get; private set; }
+    public float MaxSpeed { get; private set; }
+    public float MinSpeed { get; private set; }
+    public float AvgSpeed { get; private set; }
+    private float totalSpeed = 0;
+    private int totalSpeedCount = 0;
     
     void Start()
     {
+        // Initialize Strength values
+        MaxStrength = -99;
+        MinStrength = 0;
+        GetSignalStrength();
+
+        // Initialize Speed values
+        Speed = 0;
+        MaxSpeed = 0;
+        MinSpeed = 0;
+        StartCoroutine(GetSpeed());
+
         using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
         {
             context = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
@@ -32,7 +59,9 @@ public class WifiStrength : MonoBehaviour
 
         AndroidJavaObject wifiInfo = wifiManager.Call<AndroidJavaObject>("getConnectionInfo");
         Debug.Log("Wifi Signal: " + wifiInfo.Call<int>("getRssi"));
-        return wifiInfo.Call<int>("getRssi");
+        int strength = wifiInfo.Call<int>("getRssi");
+        updateStrength(strength);
+        return strength;
     }
 
     public string GetWifiName()
@@ -162,14 +191,49 @@ public class WifiStrength : MonoBehaviour
                 float dataSize = 25 * 8; // size in megabits
                 float speed = dataSize / timeTaken; // Speed in Mbps
                 speed = MathF.Round(speed, 2, MidpointRounding.ToEven);
+                updateSpeed(speed);
                 updateDataScreen.UpdateSignalSpeed(speed);
             }
             else
             {
+                updateSpeed(0);
                 updateDataScreen.UpdateSignalSpeed(0);
             }
         }
     }
+
+    void updateStrength(int s) {
+        Strength = s;
+        // Max
+        if (Strength > MaxStrength) {
+            MaxStrength = Strength;
+        }
+        // Min
+        if (Strength < MinStrength) {
+            MinStrength = Strength;
+        }
+        // Average
+        totalStrength += Strength;
+        totalStrengthCount++;
+        AvgStrength = totalStrength / totalStrengthCount;
+    }
+
+    void updateSpeed(float s) {
+        Speed = s;
+        // Max
+        if (Speed > MaxSpeed) {
+            MaxSpeed = Speed;
+        }
+        // Min
+        if (Speed < MinSpeed) {
+            MinSpeed = Speed;
+        }
+        // Average
+        totalSpeed += Speed;
+        totalSpeedCount++;
+        AvgSpeed = totalSpeed / totalSpeedCount;
+    }
+
 
     void RequestPermissions()
     {
