@@ -16,12 +16,27 @@ public class HandMap : MonoBehaviour
 
     void Update()
     {
-        Vector3 direction = leftHand.forward;
+        Vector3 palmNormal = leftHand.up;
 
-        if (direction != null)
+        if (palmNormal != null)
         {
             // Set the screen visibility based on the hand's direction
-            bool isUp = direction.y >= -0.3 && direction.y <= 0.5 && direction.x < 0;
+            bool isUp = Vector3.Dot(palmNormal, Vector3.up) > 0.5f;
+
+            // Check if the user is using hands or controllers
+            if (OVRInput.GetActiveController() == OVRInput.Controller.Hands)
+            {
+                // Using hands
+                screen.transform.rotation = leftHand.rotation * Quaternion.Euler(75, 90, 0);
+                screen.transform.position = leftHand.position + /*X*/ leftHand.right * 0.1f + /*Y*/leftHand.up * 0.05f + /*Z*/ leftHand.forward * -0.18f;
+            }
+            else
+            {
+                // Using Controllers
+                screen.transform.rotation = leftHand.rotation * Quaternion.Euler(90, 0, 0);
+                screen.transform.position = leftHand.position + leftHand.right * 0.18f;
+            }
+
             screen.SetActive(isUp);
         }
         else
