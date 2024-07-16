@@ -1,36 +1,51 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Text;
+using System.IO;
 
 public class SendData : MonoBehaviour
 {
-    private string url = "http://127.0.0.1:5000/receive_data"; // Flask server URL
-
-    // Example data to send
-    private Dictionary<string, string> data = new Dictionary<string, string>()
-    {
-        { "wifi_name", "My Wifi" },
-        { "wifi_strength", "-37dBm" },
-        { "wifi_speed", "120Mbps" },
-        { "img_url", "https://dl3.pushbulletusercontent.com/6QIA6AZNTPRTjG5KKNDqTmQT6SYMtyOx/image.png" }
-    };
+    public float timeInterval = 3f;
+    private float timer;
+    private string url = "http://" + "192.168.1.103" + ":5000/receive_data"; // Flask server URL
+    public WifiStrength wifiStrength;
+    public HandMap handMap;
 
     void Start()
-    {
+    {        
         StartCoroutine(SendDataToServer());
+
+        timer = 0f;
+    }
+
+    void Update()
+    {
+        timer += Time.deltaTime;
+        if (timer >= timeInterval)
+        {
+            StartCoroutine(SendDataToServer());
+            timer = 0f;
+        }
     }
     
     IEnumerator SendDataToServer()
     {
-        string jsonData = JsonUtility.ToJson(new DataWrapper(data));
+        string wifi_name = wifiStrength.GetWifiName();
+        string wifi_strength = wifiStrength.GetSignalStrength() + " dBm";
+        string wifi_speed = "";
+        string img = handMap.SaveImage();
 
-        UnityWebRequest www = new UnityWebRequest(url, "POST");
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
-        www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        www.downloadHandler = new DownloadHandlerBuffer();
-        www.SetRequestHeader("Content-Type", "application/json");
+        // Create form and add fields
+        WWWForm form = new WWWForm();
+        form.AddField("wifi_name", wifi_name);
+        form.AddField("wifi_strength", wifi_strength);
+        form.AddField("wifi_speed", wifi_speed);
+
+        // Add the image file
+        byte[] imgData = File.ReadAllBytes(img);
+        form.AddBinaryData("image", imgData, "SignalMesh.png", "image/png");
+
+        UnityWebRequest www = UnityWebRequest.Post(url, form);
 
         yield return www.SendWebRequest();
 
@@ -41,24 +56,6 @@ public class SendData : MonoBehaviour
         else
         {
             Debug.Log("Response: " + www.downloadHandler.text);
-        }
-    }
-
-    // Wrapper class to convert Dictionary to JSON correctly
-    [System.Serializable]
-    private class DataWrapper
-    {
-        public string wifi_name;
-        public string wifi_strength;
-        public string wifi_speed;
-        public string img_url;
-
-        public DataWrapper(Dictionary<string, string> data)
-        {
-            this.wifi_name = data["wifi_name"];
-            this.wifi_strength = data["wifi_strength"];
-            this.wifi_speed = data["wifi_speed"];
-            this.img_url = data["img_url"];
         }
     }
 }

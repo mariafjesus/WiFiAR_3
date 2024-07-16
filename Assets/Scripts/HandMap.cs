@@ -30,7 +30,7 @@ public class HandMap : MonoBehaviour
         }
     }
 
-    public void SaveImage()
+    public string SaveImage()
     {
         RenderTexture currentRT = RenderTexture.active;
         RenderTexture.active = renderTexture;
@@ -46,5 +46,8 @@ public class HandMap : MonoBehaviour
         File.WriteAllBytes(path, bytes);
 
         Debug.Log("Saved RenderTexture to PNG: " + path);
+
+        // Return the file path
+        return path;
     }
 }

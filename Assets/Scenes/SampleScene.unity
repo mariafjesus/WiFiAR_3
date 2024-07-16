@@ -1586,6 +1586,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6580cc7b22c11b40bb54293b5f42fc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeInterval: 10
+  wifiStrength: {fileID: 730769971}
+  handMap: {fileID: 1929108979}
 --- !u!1 &742368564
 GameObject:
   m_ObjectHideFlags: 0
