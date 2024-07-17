@@ -7,7 +7,9 @@ public class SendData : MonoBehaviour
 {
     public float timeInterval = 3f;
     private float timer;
-    private string url = "http://" + "192.168.1.103" + ":5000/receive_data"; // Flask server URL
+    // Casa: 192.168.1.103
+    // Altice: 192.168.1.64
+    private string url = "http://" + "ET50002359.home" + ":5000/receive_data"; // Flask server URL
     public WifiStrength wifiStrength;
     public HandMap handMap;
 

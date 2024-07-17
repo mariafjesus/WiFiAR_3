@@ -38,7 +38,7 @@ public class WifiStrength : MonoBehaviour
         // Initialize Speed values
         Speed = 0;
         MaxSpeed = 0;
-        MinSpeed = 0;
+        MinSpeed = -1;
         StartCoroutine(GetSpeed());
 
         using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
@@ -190,7 +190,7 @@ public class WifiStrength : MonoBehaviour
                 float timeTaken = endTime - startTime;
                 float dataSize = 25 * 8; // size in megabits
                 float speed = dataSize / timeTaken; // Speed in Mbps
-                speed = MathF.Round(speed, 2, MidpointRounding.ToEven);
+                speed = MathF.Round(speed);
                 updateSpeed(speed);
                 updateDataScreen.UpdateSignalSpeed(speed);
             }
@@ -225,7 +225,7 @@ public class WifiStrength : MonoBehaviour
             MaxSpeed = Speed;
         }
         // Min
-        if (Speed < MinSpeed) {
+        if (Speed < MinSpeed || MinSpeed == -1) {
             MinSpeed = Speed;
         }
         // Average
