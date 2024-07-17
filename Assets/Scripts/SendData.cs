@@ -12,6 +12,7 @@ public class SendData : MonoBehaviour
     private string url = "http://" + "ET50002359.home" + ":5000/receive_data"; // Flask server URL
     public WifiStrength wifiStrength;
     public HandMap handMap;
+    public SignalMesh signalMesh;
 
     void Start()
     {        
@@ -45,6 +46,8 @@ public class SendData : MonoBehaviour
         string wifi_avg_speed = wifiStrength.AvgSpeed + " Mbps";
         // Image
         string img = handMap.SaveImage();
+        // Matrix
+        string matrix = signalMesh.GetSignalStrengthJson();
 
         // Create form and add fields
         WWWForm form = new WWWForm();
@@ -63,6 +66,9 @@ public class SendData : MonoBehaviour
         // Add the image file
         byte[] imgData = File.ReadAllBytes(img);
         form.AddBinaryData("image", imgData, "SignalMesh.png", "image/png");
+
+        // Add matrix
+        form.AddField("wifi_strength_matrix", matrix);
 
         UnityWebRequest www = UnityWebRequest.Post(url, form);
 

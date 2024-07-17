@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
+using System;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class SignalMesh : MonoBehaviour
@@ -26,6 +28,8 @@ public class SignalMesh : MonoBehaviour
     private Transform centerEyeAnchorTransform;
     private WifiStrength wifiStrength;
     private float timer;
+
+    private int[,] signalStrengthValues; // Array to store signal strength values
 
     void Start()
     {
@@ -54,6 +58,9 @@ public class SignalMesh : MonoBehaviour
         if (mapBackground != null) {
             mapBackground.transform.localScale = new Vector3(xSize * vertexSpacing + 1, 1f, zSize * vertexSpacing + 1);
         }
+
+        // Initialize signal strength values array
+        signalStrengthValues = new int[xSize, zSize];
 
         CreateShape(); // Create initial mesh
         UpdateMesh();
@@ -151,11 +158,11 @@ public class SignalMesh : MonoBehaviour
         // Get color of the vertex
         Color color = gradient.Evaluate(height / 1.20f); // Value between 0 and 1
 
-        ApplyInterpolation(userPosition, height, color);
+        ApplyInterpolation(userPosition, signalStrength, height, color);
         UpdateMesh();
     }
 
-    void ApplyInterpolation(Vector3 userPosition, float newHeight, Color newColor)
+    void ApplyInterpolation(Vector3 userPosition, int signalStrength, float newHeight, Color newColor)
     {
         float minX = -xSize * vertexSpacing / 2;
         float minZ = -zSize * vertexSpacing / 2;
@@ -165,6 +172,9 @@ public class SignalMesh : MonoBehaviour
 
         int xIndex = Mathf.Clamp(Mathf.FloorToInt(relativeX / vertexSpacing), 0, xSize - 1);
         int zIndex = Mathf.Clamp(Mathf.FloorToInt(relativeZ / vertexSpacing), 0, zSize - 1);
+
+        // Add value to matrix
+        signalStrengthValues[(int)MathF.Round(xIndex),(int)MathF.Round(zIndex)] = signalStrength;
 
         for (int z = -Mathf.CeilToInt(interpolationDistance / vertexSpacing); z <= Mathf.CeilToInt(interpolationDistance / vertexSpacing); z++)
         {
@@ -188,5 +198,23 @@ public class SignalMesh : MonoBehaviour
                 }
             }
         }
+    }
+
+    // Convert 2D array to JSON
+    public string GetSignalStrengthJson()
+    {
+        // Convert the 2D array to a list of lists for JSON serialization
+        List<List<int>> signalStrengthList = new List<List<int>>();
+        for (int i = 0; i < xSize; i++)
+        {
+            List<int> row = new List<int>();
+            for (int j = 0; j < zSize; j++)
+            {
+                row.Add(signalStrengthValues[i, j]);
+            }
+            signalStrengthList.Add(row);
+        }
+        // Convert to JSON string
+        return JsonConvert.SerializeObject(signalStrengthList);
     }
 }

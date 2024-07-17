@@ -1589,6 +1589,7 @@ MonoBehaviour:
   timeInterval: 10
   wifiStrength: {fileID: 730769971}
   handMap: {fileID: 1929108979}
+  signalMesh: {fileID: 1872975715}
 --- !u!1 &742368564
 GameObject:
   m_ObjectHideFlags: 0
