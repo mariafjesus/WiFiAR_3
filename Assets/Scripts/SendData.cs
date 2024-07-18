@@ -8,8 +8,8 @@ public class SendData : MonoBehaviour
     public float timeInterval = 3f;
     private float timer;
     // Casa: 192.168.1.103
-    // Altice: 192.168.1.64
-    private string url = "http://" + "ET50002359.home" + ":5000/receive_data"; // Flask server URL
+    // Altice: 192.168.1.64 ET5002359.home
+    private string url = "http://" + "192.168.1.103" + ":5000/receive_data"; // Flask server URL
     public WifiStrength wifiStrength;
     public HandMap handMap;
     public SignalMesh signalMesh;
@@ -35,19 +35,21 @@ public class SendData : MonoBehaviour
     {
         string wifi_name = wifiStrength.GetWifiName();
         // Strength values
-        string wifi_strength = wifiStrength.Strength + " dBm";
-        string wifi_max_strength = wifiStrength.MaxStrength + " dBm";
-        string wifi_min_strength = wifiStrength.MinStrength + " dBm";
-        string wifi_avg_strength = wifiStrength.AvgStrength + " dBm";
+        int wifi_strength = wifiStrength.Strength;
+        int wifi_max_strength = wifiStrength.MaxStrength;
+        int wifi_min_strength = wifiStrength.MinStrength;
+        string wifi_avg_strength = wifiStrength.AvgStrength + "";
         // Speed values
-        string wifi_speed = wifiStrength.Speed + " Mbps";
-        string wifi_max_speed = wifiStrength.MaxSpeed + " Mbps";
-        string wifi_min_speed = wifiStrength.MinSpeed + " Mbps";
-        string wifi_avg_speed = wifiStrength.AvgSpeed + " Mbps";
+        int wifi_speed = (int)wifiStrength.Speed;
+        int wifi_max_speed = (int)wifiStrength.MaxSpeed;
+        int wifi_min_speed = (int)wifiStrength.MinSpeed;
+        string wifi_avg_speed = wifiStrength.AvgSpeed + "";
         // Image
-        string img = handMap.SaveImage();
+        string map_img = handMap.SaveMapImage();
+        string rooms_img = handMap.SaveRoomsImage();
         // Matrix
-        string matrix = signalMesh.GetSignalStrengthJson();
+        string strength_matrix = signalMesh.GetSignalStrengthJson();
+        string speed_matrix = signalMesh.GetSignalSpeedJson();
 
         // Create form and add fields
         WWWForm form = new WWWForm();
@@ -64,11 +66,15 @@ public class SendData : MonoBehaviour
         form.AddField("wifi_avg_speed", wifi_avg_speed);
 
         // Add the image file
-        byte[] imgData = File.ReadAllBytes(img);
-        form.AddBinaryData("image", imgData, "SignalMesh.png", "image/png");
+        byte[] mapImgData = File.ReadAllBytes(map_img);
+        form.AddBinaryData("map_image", mapImgData, "SignalMesh.png", "image/png");
+
+        byte[] roomsImgData = File.ReadAllBytes(rooms_img);
+        form.AddBinaryData("rooms_image", roomsImgData, "RoomsLayout.png", "image/png");
 
         // Add matrix
-        form.AddField("wifi_strength_matrix", matrix);
+        form.AddField("wifi_strength_matrix", strength_matrix);
+        form.AddField("wifi_speed_matrix", speed_matrix);
 
         UnityWebRequest www = UnityWebRequest.Post(url, form);
 

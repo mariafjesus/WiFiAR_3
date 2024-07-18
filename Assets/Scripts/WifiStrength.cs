@@ -11,6 +11,7 @@ public class WifiStrength : MonoBehaviour
     private AndroidJavaObject context;
 
     public UpdateDataScreen updateDataScreen;
+    public SignalMesh signalMesh;
 
     // Strength
     public int Strength { get; private set; }
@@ -219,6 +220,9 @@ public class WifiStrength : MonoBehaviour
     }
 
     void updateSpeed(float s) {
+        // Add to matrix
+        signalMesh.addSpeed((int)s);
+
         Speed = s;
         // Max
         if (Speed > MaxSpeed) {

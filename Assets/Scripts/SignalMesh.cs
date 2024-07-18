@@ -22,6 +22,7 @@ public class SignalMesh : MonoBehaviour
     public Gradient gradient;
 
     public Camera mapCamera;
+    public Camera roomsCamera;
     public GameObject mapBackground;
 
     private Transform cameraRigTransform;
@@ -30,6 +31,7 @@ public class SignalMesh : MonoBehaviour
     private float timer;
 
     private int[,] signalStrengthValues; // Array to store signal strength values
+    public int[,] signalSpeedValues { get; set; } // Array to store signal strength values
 
     void Start()
     {
@@ -51,8 +53,9 @@ public class SignalMesh : MonoBehaviour
         GetComponent<MeshFilter>().mesh = mesh;
 
         // Set the map camera heigth to see all the mesh
-        if (mapCamera != null) {
+        if (mapCamera != null && roomsCamera != null) {
             mapCamera.orthographicSize = xSize * vertexSpacing / 2;
+            roomsCamera.orthographicSize = xSize * vertexSpacing / 2;
         }
         // Resize background plane to fill the map
         if (mapBackground != null) {
@@ -61,6 +64,7 @@ public class SignalMesh : MonoBehaviour
 
         // Initialize signal strength values array
         signalStrengthValues = new int[xSize, zSize];
+        signalSpeedValues = new int[xSize, zSize];
 
         CreateShape(); // Create initial mesh
         UpdateMesh();
@@ -134,14 +138,12 @@ public class SignalMesh : MonoBehaviour
         timer += Time.deltaTime;
         if (timer >= timeInterval)
         {
-            // Check if user is over a different vertex
-            Vector3 userPosition = centerEyeAnchorTransform.position;
-            ReadWifi(userPosition);
+            ReadWifi();
             timer = 0f;
         }
     }
 
-    void ReadWifi(Vector3 userPosition)
+    void ReadWifi()
     {
         // Get Wifi signal strength
         int signalStrength = wifiStrength.GetSignalStrength();
@@ -158,20 +160,14 @@ public class SignalMesh : MonoBehaviour
         // Get color of the vertex
         Color color = gradient.Evaluate(height / 1.20f); // Value between 0 and 1
 
-        ApplyInterpolation(userPosition, signalStrength, height, color);
+        ApplyInterpolation(signalStrength, height, color);
         UpdateMesh();
     }
 
-    void ApplyInterpolation(Vector3 userPosition, int signalStrength, float newHeight, Color newColor)
+    void ApplyInterpolation(int signalStrength, float newHeight, Color newColor)
     {
-        float minX = -xSize * vertexSpacing / 2;
-        float minZ = -zSize * vertexSpacing / 2;
-
-        float relativeX = userPosition.x - transform.position.x - minX;
-        float relativeZ = userPosition.z - transform.position.z - minZ;
-
-        int xIndex = Mathf.Clamp(Mathf.FloorToInt(relativeX / vertexSpacing), 0, xSize - 1);
-        int zIndex = Mathf.Clamp(Mathf.FloorToInt(relativeZ / vertexSpacing), 0, zSize - 1);
+        int xIndex = GetXIndex();
+        int zIndex = GetZIndex();
 
         // Add value to matrix
         signalStrengthValues[(int)MathF.Round(xIndex),(int)MathF.Round(zIndex)] = signalStrength;
@@ -183,7 +179,7 @@ public class SignalMesh : MonoBehaviour
                 int index = (zIndex + z) * (xSize + 1) + (xIndex + x);
                 if (index >= 0 && index < vertices.Length)
                 {
-                    float distance = Vector3.Distance(new Vector3((xIndex + x) * vertexSpacing, 0, (zIndex + z) * vertexSpacing), new Vector3(relativeX, 0, relativeZ));
+                    float distance = Vector3.Distance(new Vector3((xIndex + x) * vertexSpacing, 0, (zIndex + z) * vertexSpacing), new Vector3(GetRelativeX(), 0, GetRelativeZ()));
                     if (distance <= interpolationDistance)
                     {
                         // Use a smoothstep function to create a smoother interpolation
@@ -200,21 +196,65 @@ public class SignalMesh : MonoBehaviour
         }
     }
 
+    float GetRelativeX()
+    {
+        Vector3 userPosition = centerEyeAnchorTransform.position;
+        float minX = -xSize * vertexSpacing / 2;
+        float relativeX = userPosition.x - transform.position.x - minX;
+        return relativeX;
+    }
+    int GetXIndex()
+    {
+        float relativeX = GetRelativeX();
+        int xIndex = Mathf.Clamp(Mathf.FloorToInt(relativeX / vertexSpacing), 0, xSize - 1);
+        return xIndex;
+    }
+
+    float GetRelativeZ()
+    {
+        Vector3 userPosition = centerEyeAnchorTransform.position;
+        float minZ = -zSize * vertexSpacing / 2;
+        float relativeZ = userPosition.z - transform.position.z - minZ;
+        return relativeZ;
+    }
+
+    int GetZIndex()
+    {
+        float relativeZ = GetRelativeZ();
+        int zIndex = Mathf.Clamp(Mathf.FloorToInt(relativeZ / vertexSpacing), 0, zSize - 1);
+        return zIndex;
+    }
+
+    public void addSpeed(int speed) {
+        // Add speed value to matrix, the function is called when a new speed value is calculated
+        signalSpeedValues[GetXIndex(),GetZIndex()] = speed;
+    }
+
     // Convert 2D array to JSON
     public string GetSignalStrengthJson()
     {
+        return GetMatrixJson(signalStrengthValues);
+    }
+
+    public string GetSignalSpeedJson()
+    {
+        return GetMatrixJson(signalSpeedValues);
+    }
+
+    public string GetMatrixJson(int[,] matrix)
+    {
         // Convert the 2D array to a list of lists for JSON serialization
-        List<List<int>> signalStrengthList = new List<List<int>>();
+        List<List<int>> list = new List<List<int>>();
         for (int i = 0; i < xSize; i++)
         {
             List<int> row = new List<int>();
             for (int j = 0; j < zSize; j++)
             {
-                row.Add(signalStrengthValues[i, j]);
+                row.Add(matrix[i, j]);
             }
-            signalStrengthList.Add(row);
+            list.Add(row);
         }
         // Convert to JSON string
-        return JsonConvert.SerializeObject(signalStrengthList);
+        return JsonConvert.SerializeObject(list);
     }
 }

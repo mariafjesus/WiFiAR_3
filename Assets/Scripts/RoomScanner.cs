@@ -182,7 +182,7 @@ public class RoomScanner : MonoBehaviour
         currentMapLineRenderer.positionCount = 0;
         mapLineRenderers.Add(currentMapLineRenderer);
 
-        currentMapLineRenderer.gameObject.layer = LayerMask.NameToLayer("Map");
+        currentMapLineRenderer.gameObject.layer = LayerMask.NameToLayer("Rooms");
 
         // Clear points list to start a new line segment
         points.Clear();
