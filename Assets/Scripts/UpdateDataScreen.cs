@@ -17,10 +17,13 @@ public class UpdateDataScreen : MonoBehaviour
     public float dropdownTimeInterval = 1f;
     public TMP_Text text;
 
+    public TextMeshProUGUI FPSText; // Reference to the Text
+
     private float textTimer;
     private float speedTextTimer;
     private float dropdownTimer;
     public WifiStrength wifiStrength;
+    int fps = 0;
 
     void Start() {
         if (wifiStrengthText == null)
@@ -36,6 +39,7 @@ public class UpdateDataScreen : MonoBehaviour
         if (textTimer >= textTimeInterval)
         {
             UpdateSignalStrength();
+            UpdateFPS();
             textTimer = 0f;
         }
 
@@ -52,6 +56,8 @@ public class UpdateDataScreen : MonoBehaviour
             UpdateDropdown();
             dropdownTimer = 0f;
         }
+
+        fps = (int)(1f / Time.unscaledDeltaTime);
     }
 
     public void UpdateSignalStrength()
@@ -71,6 +77,11 @@ public class UpdateDataScreen : MonoBehaviour
         {
             wifiSpeedText.text = speed + " Mbps";
         }
+    }
+
+    public void UpdateFPS()
+    {
+        FPSText.text = fps + " FPS";
     }
 
     public void UpdateDropdown()
