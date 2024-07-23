@@ -216,7 +216,7 @@ public class WifiStrength : MonoBehaviour
         // Average
         totalStrength += Strength;
         totalStrengthCount++;
-        AvgStrength = totalStrength / totalStrengthCount;
+        AvgStrength = MathF.Round(totalStrength / totalStrengthCount * 100f)/100f; // Round with 2 decimal places
     }
 
     void updateSpeed(float s) {
@@ -235,7 +235,7 @@ public class WifiStrength : MonoBehaviour
         // Average
         totalSpeed += Speed;
         totalSpeedCount++;
-        AvgSpeed = totalSpeed / totalSpeedCount;
+        AvgSpeed = MathF.Round(totalSpeed / totalSpeedCount * 100f)/100f; // Round with 2 decimal places
     }
 
 

@@ -5,7 +5,7 @@ using System.IO;
 
 public class SendData : MonoBehaviour
 {
-    public float timeInterval = 3f;
+    public float timeInterval = 5f;
     private float timer;
     // Casa: 192.168.1.103
     // Altice: 192.168.1.64 ET5002359.home
