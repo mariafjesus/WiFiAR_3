@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
 using Meta.XR.Locomotion.Teleporter;
+using System.Threading.Tasks;
 
 public class HandMap : MonoBehaviour
 {
@@ -50,7 +51,7 @@ public class HandMap : MonoBehaviour
         }
     }
 
-    public string SaveImage(RenderTexture renderTexture, string filename)
+    public async Task<string> SaveImageAsync(RenderTexture renderTexture, string filename)
     {
         RenderTexture currentRT = RenderTexture.active;
         RenderTexture.active = renderTexture;
@@ -61,22 +62,20 @@ public class HandMap : MonoBehaviour
 
         RenderTexture.active = currentRT;
 
-        byte[] bytes = image.EncodeToPNG();
-        string path = Path.Combine(Application.persistentDataPath, filename);
-        File.WriteAllBytes(path, bytes);
+        byte[] bytes = await Task.Run(() => image.EncodeToPNG());
+        string path = await Task.Run(() => Path.Combine(Application.persistentDataPath, filename));
 
-        Debug.Log("Saved RenderTexture to PNG: " + path);
+        await Task.Run(() => File.WriteAllBytes(path, bytes));
 
         // Return the file path
         return path;
     }
 
-    public string SaveMapImage() {
-        return SaveImage(mapRenderTexture, "SignalMesh.png");
+    public async Task<string> SaveMapImageAsync() {
+        return await SaveImageAsync(mapRenderTexture, "SignalMesh.png");
     }
-
-    public string SaveRoomsImage() {
-        return SaveImage(roomsRenderTexture, "RoomLayout.png");
+    public async Task<string> SaveRoomsImageAsync() {
+        return await SaveImageAsync(roomsRenderTexture, "RoomLayout.png");
     }
 
     public void HideWalls() {

@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.IO;
+using System.Threading.Tasks;
 
 public class SendData : MonoBehaviour
 {
@@ -15,9 +16,8 @@ public class SendData : MonoBehaviour
     public SignalMesh signalMesh;
 
     void Start()
-    {        
-        StartCoroutine(SendDataToServer());
-
+    {
+        SendDataToServerAsync();
         timer = 0f;
     }
 
@@ -26,12 +26,12 @@ public class SendData : MonoBehaviour
         timer += Time.deltaTime;
         if (timer >= timeInterval)
         {
-            StartCoroutine(SendDataToServer());
+            SendDataToServerAsync();
             timer = 0f;
         }
     }
-    
-    IEnumerator SendDataToServer()
+
+    public async void SendDataToServerAsync()
     {
         string wifi_name = wifiStrength.GetWifiName();
         // Strength values
@@ -45,8 +45,8 @@ public class SendData : MonoBehaviour
         int wifi_min_speed = (int)wifiStrength.MinSpeed;
         string wifi_avg_speed = wifiStrength.AvgSpeed + "";
         // Image
-        string map_img = handMap.SaveMapImage();
-        string rooms_img = handMap.SaveRoomsImage();
+        string map_img = await handMap.SaveMapImageAsync();
+        string rooms_img = await handMap.SaveRoomsImageAsync();
         // Matrix
         string strength_matrix = signalMesh.GetSignalStrengthJson();
         string speed_matrix = signalMesh.GetSignalSpeedJson();
@@ -66,11 +66,11 @@ public class SendData : MonoBehaviour
         form.AddField("wifi_avg_speed", wifi_avg_speed);
 
         // Add the image file
-        byte[] mapImgData = File.ReadAllBytes(map_img);
-        form.AddBinaryData("map_image", mapImgData, "SignalMesh.png", "image/png");
+        byte[] mapImgData = await Task.Run(() => File.ReadAllBytes(map_img));
+        await Task.Run(() => form.AddBinaryData("map_image", mapImgData, "SignalMesh.png", "image/png"));
 
-        byte[] roomsImgData = File.ReadAllBytes(rooms_img);
-        form.AddBinaryData("rooms_image", roomsImgData, "RoomsLayout.png", "image/png");
+        byte[] roomsImgData = await Task.Run(() => File.ReadAllBytes(rooms_img));
+        await Task.Run(() => form.AddBinaryData("rooms_image", roomsImgData, "RoomsLayout.png", "image/png"));
 
         // Add matrix
         form.AddField("wifi_strength_matrix", strength_matrix);
@@ -78,7 +78,12 @@ public class SendData : MonoBehaviour
 
         UnityWebRequest www = UnityWebRequest.Post(url, form);
 
-        yield return www.SendWebRequest();
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
 
         if (www.result != UnityWebRequest.Result.Success)
         {
