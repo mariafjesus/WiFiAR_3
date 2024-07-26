@@ -11,6 +11,7 @@ public class HandMap : MonoBehaviour
     public GameObject screen; // Reference to the screen GameObject
     public GameObject handMap;
     public Transform leftHand; // Reference to the left hand/controller Transform
+    public GameObject mapCursor;
 
     public RenderTexture mapRenderTexture; // Reference to the RenderTexture
     public RenderTexture roomsRenderTexture; // Reference to the RenderTexture
@@ -51,8 +52,15 @@ public class HandMap : MonoBehaviour
         }
     }
 
-    public async Task<string> SaveImageAsync(RenderTexture renderTexture, string filename)
+    public async Task<string> SaveImageAsync(RenderTexture renderTexture, string filename, bool hide_cursor)
     {
+        if (hide_cursor)
+        {
+            mapCursor.SetActive(false);
+            await Task.Yield(); // Wait for the next frame
+            await Task.Yield();
+        }
+
         RenderTexture currentRT = RenderTexture.active;
         RenderTexture.active = renderTexture;
 
@@ -63,19 +71,24 @@ public class HandMap : MonoBehaviour
         RenderTexture.active = currentRT;
 
         byte[] bytes = await Task.Run(() => image.EncodeToPNG());
-        string path = await Task.Run(() => Path.Combine(Application.persistentDataPath, filename));
+        string path = Path.Combine(Application.persistentDataPath, filename);
 
         await Task.Run(() => File.WriteAllBytes(path, bytes));
+
+        if (hide_cursor)
+        {
+            mapCursor.SetActive(true);
+        }
 
         // Return the file path
         return path;
     }
 
     public async Task<string> SaveMapImageAsync() {
-        return await SaveImageAsync(mapRenderTexture, "SignalMesh.png");
+        return await SaveImageAsync(mapRenderTexture, "SignalMesh.png", true);
     }
     public async Task<string> SaveRoomsImageAsync() {
-        return await SaveImageAsync(roomsRenderTexture, "RoomLayout.png");
+        return await SaveImageAsync(roomsRenderTexture, "RoomLayout.png", false);
     }
 
     public void HideWalls() {

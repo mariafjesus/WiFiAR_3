@@ -6,7 +6,6 @@ using UnityEngine;
 public class FindNetworks : MonoBehaviour
 {
     public float distanceInterval = 10f; // Distance between scans
-    public GameObject cube;
     public GameObject locationMarker;
 
     private Transform cameraRigTransform;
@@ -15,7 +14,11 @@ public class FindNetworks : MonoBehaviour
     private AndroidJavaObject wifiManager;
     private AndroidJavaObject context;
     private List<ScanData> scanDataList = new List<ScanData>();
+
+    private Dictionary<string, GameObject> locationMarkers = new Dictionary<string, GameObject>();
     private const int maxScans = 4;
+    private int totalScans = 0;
+    private float timer = 0f;
 
     // Scan data structure
     private struct ScanData
@@ -24,7 +27,7 @@ public class FindNetworks : MonoBehaviour
         public Dictionary<string, int> networks; // SSID -> RSSI
     }
 
-    private struct TrilaterateData
+    private struct NetworkData
     {
         public Vector2 position;
         public float distance;
@@ -67,15 +70,22 @@ public class FindNetworks : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Check if the user moved 
+        // Check if the user moved
+        timer += Time.deltaTime;
         if (Vector3.Distance(centerEyeAnchorTransform.position, lastPosition) >= distanceInterval)
         {
-            lastPosition = centerEyeAnchorTransform.position;
-            StartCoroutine(ScanNetworks());
+            if (!(totalScans % 4 == 0 && totalScans != 0 && timer <= 120)) // Stop scans if the two minutes haven't passed
+            {
+                lastPosition = centerEyeAnchorTransform.position;
+                //PlaceLocationMarker("2", new Vector2(lastPosition.x, lastPosition.z));
+                StartCoroutine(ScanNetworks());
+                timer = 0;
+            }            
         }
     }
 
     IEnumerator ScanNetworks() {
+        totalScans++;
         if (wifiManager == null) yield return null;
 
         bool success = wifiManager.Call<bool>("startScan");
@@ -111,7 +121,7 @@ public class FindNetworks : MonoBehaviour
     {
         // Assuming all scans detect the same networks
         Dictionary<string, List<Vector2>> networkPositions = new Dictionary<string, List<Vector2>>();
-        Dictionary<string, List<TrilaterateData>> newList = new Dictionary<string, List<TrilaterateData>>();
+        Dictionary<string, List<NetworkData>> newList = new Dictionary<string, List<NetworkData>>();
 
         foreach (var scanData in scanDataList)
         {
@@ -120,7 +130,7 @@ public class FindNetworks : MonoBehaviour
                 if (!networkPositions.ContainsKey(network.Key))
                 {
                     networkPositions[network.Key] = new List<Vector2>();
-                    newList[network.Key] = new List<TrilaterateData>();
+                    newList[network.Key] = new List<NetworkData>();
                 }
 
                 // Convert RSSI to distance
@@ -128,19 +138,31 @@ public class FindNetworks : MonoBehaviour
                 Vector2 position2D = new Vector2(scanData.position.x, scanData.position.z);
                 networkPositions[network.Key].Add(position2D + (Vector2.one * distance));
 
-                TrilaterateData newPos = new TrilaterateData();
+                NetworkData newPos = new NetworkData();
                 newPos.position = position2D;
-                newPos.distance = distance;
+                newPos.distance = network.Value;
                 newList[network.Key].Add(newPos);
             }
         }
 
-        foreach (var network in networkPositions)
+        /*foreach (var network in networkPositions)
         {
             Vector2 center = WeightedCentroid(network.Value);
             Debug.Log($"Calculated center for network {network.Key}: {center}");
-            //Instantiate(cube, center, Quaternion.identity);
+            
             PlaceLocationMarker(network.Key, center);
+        }*/
+
+        foreach (var network in newList)
+        {
+            if (network.Value.Count > 3) // Must have at least 4 points
+            {
+                Vector2 center = FindCenter(network.Value);
+                Debug.Log($"Calculated center for network {network.Key}: {center}");
+                
+                PlaceLocationMarker(network.Key, center);
+            }
+            
         }
 
         /*foreach (var network in newList)
@@ -174,6 +196,23 @@ public class FindNetworks : MonoBehaviour
         return sum / positions.Count;
     }
 
+    Vector3 FindCenter(List<NetworkData> data)
+    {
+        float totalX = 0;
+        float totalY = 0;
+        float total = 0;
+        foreach (var d in data) {
+            float n = d.distance + 100f;
+            if (n < 0) {
+                n = 0;
+            }
+            total += n;
+            totalX += d.position.x * n;
+            totalY += d.position.y * n;
+        }
+        return new Vector3(totalX/total, 0, totalY/total);
+    }
+
     // Uses last 3 values to calculate center of Network
     Vector3 Trilaterate(Vector2 p1, float d1, Vector2 p2, float d2, Vector2 p3, float d3) {
         float A = 2 * (p2.x - p1.x);
@@ -199,14 +238,22 @@ public class FindNetworks : MonoBehaviour
     }
 
     void PlaceLocationMarker(string name, Vector2 position) {
-        GameObject marker = Instantiate(locationMarker, new Vector3(position.x, 0, position.y), Quaternion.identity);
+        if (locationMarkers.ContainsKey(name)) {
+            // Update the position of the marker
+            locationMarkers[name].transform.position = new Vector3(position.x, 0, position.y);
+        } else {
+            GameObject marker = Instantiate(locationMarker, new Vector3(position.x, 0, position.y), Quaternion.identity);
 
-        // Change text
-        TextMeshProUGUI textMeshPro = marker.GetComponentInChildren<TextMeshProUGUI>();
+            // Change text
+            TextMeshProUGUI textMeshPro = marker.GetComponentInChildren<TextMeshProUGUI>();
 
-        if (textMeshPro != null)
-        {
-            textMeshPro.text = name;
+            if (textMeshPro != null)
+            {
+                textMeshPro.text = name;
+            }
+
+            locationMarkers.Add(name, marker);
         }
+        
     }
 }

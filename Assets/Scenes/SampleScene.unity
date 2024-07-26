@@ -1149,6 +1149,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6260085778185356110, guid: e293cb5d67bb037419db4cd53b21fe3f,
+        type: 3}
+      propertyPath: mainCamera
+      value: 
+      objectReference: {fileID: 841675158}
     - target: {fileID: 6990767856638495709, guid: e293cb5d67bb037419db4cd53b21fe3f,
         type: 3}
       propertyPath: m_Mesh
@@ -1157,7 +1162,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7562804979794394771, guid: e293cb5d67bb037419db4cd53b21fe3f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: e293cb5d67bb037419db4cd53b21fe3f, type: 3}
 --- !u!1 &410087039
 GameObject:
@@ -1850,7 +1859,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   distanceInterval: 5
-  cube: {fileID: 1371648702880568446, guid: 2b23494ae56766e44b91f2b51310b3d4, type: 3}
   locationMarker: {fileID: 1216998368843442611, guid: e293cb5d67bb037419db4cd53b21fe3f,
     type: 3}
 --- !u!1 &742368564
@@ -2334,6 +2342,12 @@ MonoBehaviour:
 --- !u!4 &841675157 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2483171112402263012, guid: f54012181eacade4ea242c65f804720f,
+    type: 3}
+  m_PrefabInstance: {fileID: 841675150}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &841675158 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 2483171112400622654, guid: f54012181eacade4ea242c65f804720f,
     type: 3}
   m_PrefabInstance: {fileID: 841675150}
   m_PrefabAsset: {fileID: 0}
@@ -5028,7 +5042,8 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6510453752950049242, guid: afe0ce9835035434590b1eacfe68a2f8, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -5333,6 +5348,7 @@ MonoBehaviour:
   screen: {fileID: 1379950280}
   handMap: {fileID: 299744601}
   leftHand: {fileID: 352404487}
+  mapCursor: {fileID: 507895169}
   mapRenderTexture: {fileID: 8400000, guid: 7f72feb349d786842b1efe610a255cdf, type: 2}
   roomsRenderTexture: {fileID: 8400000, guid: 5d988e94112c4524bb389188a81a5e22, type: 2}
   rawImage: {fileID: 36133705}
