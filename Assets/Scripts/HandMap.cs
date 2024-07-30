@@ -5,6 +5,8 @@ using System.IO;
 using UnityEngine.UI;
 using Meta.XR.Locomotion.Teleporter;
 using System.Threading.Tasks;
+using UnityEngine.Rendering;
+using System.Data;
 
 public class HandMap : MonoBehaviour
 {
@@ -74,6 +76,8 @@ public class HandMap : MonoBehaviour
         string path = Path.Combine(Application.persistentDataPath, filename);
 
         await Task.Run(() => File.WriteAllBytes(path, bytes));
+
+        Destroy(image); // Free memory
 
         if (hide_cursor)
         {
