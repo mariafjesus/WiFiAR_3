@@ -7,6 +7,7 @@ public class FindNetworks : MonoBehaviour
 {
     public float distanceInterval = 10f; // Distance between scans
     public GameObject locationMarker;
+    public GameObject scanIcon;
 
     private Transform cameraRigTransform;
     private Transform centerEyeAnchorTransform;
@@ -85,6 +86,7 @@ public class FindNetworks : MonoBehaviour
     }
 
     IEnumerator ScanNetworks() {
+        //Instantiate(scanIcon, lastPosition, Quaternion.identity);
         totalScans++;
         if (wifiManager == null) yield return null;
 
@@ -140,17 +142,20 @@ public class FindNetworks : MonoBehaviour
 
                 NetworkData newPos = new NetworkData();
                 newPos.position = position2D;
-                newPos.distance = network.Value;
+                newPos.distance = RssiToDistance(network.Value);
                 newList[network.Key].Add(newPos);
             }
         }
 
         /*foreach (var network in networkPositions)
         {
-            Vector2 center = WeightedCentroid(network.Value);
-            Debug.Log($"Calculated center for network {network.Key}: {center}");
-            
-            PlaceLocationMarker(network.Key, center);
+            if (network.Value.Count > 3) // Must have at least 4 points
+            {
+                Vector2 center = WeightedCentroid(network.Value);
+                Debug.Log($"Calculated center for network {network.Key}: {center}");
+                
+                PlaceLocationMarker(network.Key, center);
+            }
         }*/
 
         foreach (var network in newList)
@@ -179,9 +184,15 @@ public class FindNetworks : MonoBehaviour
 
     float RssiToDistance(int rssi)
     {
-        // Example path loss model conversion
-        int txPower = -59; // Typical value for WiFi APs
-        return Mathf.Pow(10, (txPower - rssi) / (10 * 2)); // Path loss exponent n=2 (free space)
+        // Using the log-distance path loss model
+        // RSSI = - (10 * n * log10(d) + A)
+        // d = 10 ^ ((A - RSSI) / (10 * n))
+
+        float A = -15f; // RSSI at 1 meter, you may need to adjust this
+        float n = 5f; // Path-loss exponent, you may need to adjust this
+
+        float distance = Mathf.Pow(10, (A - rssi) / (10 * n));
+        return distance;
     }
 
     Vector3 WeightedCentroid(List<Vector2> positions)
@@ -196,7 +207,7 @@ public class FindNetworks : MonoBehaviour
         return sum / positions.Count;
     }
 
-    Vector3 FindCenter(List<NetworkData> data)
+    /*Vector3 FindCenter(List<NetworkData> data)
     {
         float totalX = 0;
         float totalY = 0;
@@ -211,6 +222,32 @@ public class FindNetworks : MonoBehaviour
             totalY += d.position.y * n;
         }
         return new Vector3(totalX/total, 0, totalY/total);
+    }*/
+
+    Vector2 FindCenter(List<NetworkData> data)
+    {
+        int count = data.Count;
+        float[] distances = new float[count];
+        Vector2[] positions = new Vector2[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            distances[i] = data[i].distance;
+            positions[i] = data[i].position;
+        }
+
+        float x = 0, y = 0;
+        float totalWeight = 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            float weight = 1.0f / distances[i];
+            x += positions[i].x * weight;
+            y += positions[i].y * weight;
+            totalWeight += weight;
+        }
+
+        return new Vector2(x / totalWeight, y / totalWeight);
     }
 
     // Uses last 3 values to calculate center of Network

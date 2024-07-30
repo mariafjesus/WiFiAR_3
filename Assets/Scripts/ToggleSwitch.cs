@@ -11,6 +11,7 @@ public class ToggleSwitch : MonoBehaviour, IPointerClickHandler
         [SerializeField, Range(0, 1f)]
         protected float sliderValue;
         public bool CurrentValue { get; private set; }
+        public GameObject sliderBackground;
         
         private bool _previousValue;
         private Slider _slider;
@@ -52,9 +53,6 @@ public class ToggleSwitch : MonoBehaviour, IPointerClickHandler
             }
 
             _slider.interactable = false;
-            var sliderColors = _slider.colors;
-            sliderColors.disabledColor = Color.white;
-            _slider.colors = sliderColors;
             _slider.transition = Selectable.Transition.None;
         }
 
@@ -89,11 +87,17 @@ public class ToggleSwitch : MonoBehaviour, IPointerClickHandler
             if (_previousValue != CurrentValue)
             {
                 if (CurrentValue)
+                {
                     // Show walls
                     handMap.ShowWalls();
+                    sliderBackground.GetComponent<Image>().color = new Color32(0, 90, 200, 255);
+                }
                 else
+                {
                     // Hide walls
                     handMap.HideWalls();
+                    sliderBackground.GetComponent<Image>().color = new Color32(0, 30, 70, 255);
+                }
             }
 
             if (_animateSliderCoroutine != null)

@@ -6,22 +6,22 @@ using UnityEngine.Networking;
 
 public class UpdateDataScreen : MonoBehaviour
 {
+    public TextMeshProUGUI wifiNameText; // Reference to the Text
+    public float nameTimeInterval = 60f; // Time between updates
+    
     public TextMeshProUGUI wifiStrengthText; // Reference to the Text
     public float textTimeInterval = 0.5f; // Time between updates
 
     public TextMeshProUGUI wifiSpeedText; // Reference to the Text
     public float speedTextTimeInterval = 2f; // Time between updates
 
-    public TMP_Dropdown wifiDropdown;
-
-    public float dropdownTimeInterval = 1f;
     public TMP_Text text;
 
     public TextMeshProUGUI FPSText; // Reference to the Text
 
+    private float nameTimer;
     private float textTimer;
     private float speedTextTimer;
-    private float dropdownTimer;
     public WifiStrength wifiStrength;
     int fps = 0;
 
@@ -32,6 +32,7 @@ public class UpdateDataScreen : MonoBehaviour
         }
 
         UpdateSignalStrength();
+        UpdateWifiName();
     }
 
     void Update() {
@@ -50,14 +51,23 @@ public class UpdateDataScreen : MonoBehaviour
             speedTextTimer = 0f;
         }
 
-        dropdownTimer += Time.deltaTime; // Only update after a given time interval
-        if (dropdownTimer >= dropdownTimeInterval)
+        nameTimer += Time.deltaTime; // Only update after a given time interval
+        if (nameTimer >= nameTimeInterval)
         {
-            UpdateDropdown();
-            dropdownTimer = 0f;
+            UpdateWifiName();
+            nameTimer = 0f;
         }
 
         fps = (int)(1f / Time.unscaledDeltaTime);
+    }
+
+    public void UpdateWifiName()
+    {
+        if (wifiNameText != null)
+        {
+            string name = wifiStrength.GetWifiName();
+            wifiNameText.text = name;
+        }
     }
 
     public void UpdateSignalStrength()
@@ -82,15 +92,5 @@ public class UpdateDataScreen : MonoBehaviour
     public void UpdateFPS()
     {
         FPSText.text = fps + " FPS";
-    }
-
-    public void UpdateDropdown()
-    {
-        wifiDropdown.options.Clear();
-        List<string> networks = wifiStrength.GetPreviouslyConnectedNetworks();
-        foreach (string n in networks)
-        {
-            wifiDropdown.options.Add (new TMP_Dropdown.OptionData() {text=n});
-        }
     }
 }
