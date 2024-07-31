@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System;
+using Unity.VisualScripting;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class SignalMesh : MonoBehaviour
@@ -170,7 +171,16 @@ public class SignalMesh : MonoBehaviour
         int zIndex = GetZIndex();
 
         // Add value to matrix
-        signalStrengthValues[(int)MathF.Round(xIndex),(int)MathF.Round(zIndex)] = signalStrength;
+        if (signalStrengthValues[(int)MathF.Round(xIndex),(int)MathF.Round(zIndex)] != 0)
+        {
+            // If there is already a value calculate the average
+            signalStrengthValues[(int)MathF.Round(xIndex),(int)MathF.Round(zIndex)] = (signalStrengthValues[(int)MathF.Round(xIndex),(int)MathF.Round(zIndex)] + signalStrength) / 2;
+        }
+        else
+        {
+            signalStrengthValues[(int)MathF.Round(xIndex),(int)MathF.Round(zIndex)] = signalStrength;
+        }
+        
 
         for (int z = -Mathf.CeilToInt(interpolationDistance / vertexSpacing); z <= Mathf.CeilToInt(interpolationDistance / vertexSpacing); z++)
         {
@@ -184,12 +194,25 @@ public class SignalMesh : MonoBehaviour
                     {
                         // Use a smoothstep function to create a smoother interpolation
                         float interpolationFactor = Mathf.SmoothStep(0, 1, 1 - (distance / interpolationDistance));
+                        
+                        // Change mesh height and color
+                        if (vertices[index].y != 0)
+                        {
+                            // If there is already a value calculate the average
+                            // Interpolation for height
+                            vertices[index].y = (vertices[index].y + Mathf.Lerp(vertices[index].y, newHeight, interpolationFactor)) / 2f;
 
-                        // Interpolation for height
-                        vertices[index].y = Mathf.Lerp(vertices[index].y, newHeight, interpolationFactor);
+                            // Interpolation for color
+                            colors[index] = (colors[index] + Color.Lerp(colors[index], newColor, interpolationFactor)) / 2f;
+                        }
+                        else
+                        {
+                            // Interpolation for height
+                            vertices[index].y = Mathf.Lerp(vertices[index].y, newHeight, interpolationFactor);
 
-                        // Interpolation for color
-                        colors[index] = Color.Lerp(colors[index], newColor, interpolationFactor);
+                            // Interpolation for color
+                            colors[index] = Color.Lerp(colors[index], newColor, interpolationFactor);
+                        }
                     }
                 }
             }
