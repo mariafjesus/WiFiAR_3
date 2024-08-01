@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -68,7 +69,6 @@ public class FindNetworks : MonoBehaviour
         StartCoroutine(ScanNetworks());
     }
 
-    // Update is called once per frame
     void Update()
     {
         // Check if the user moved
@@ -86,7 +86,7 @@ public class FindNetworks : MonoBehaviour
     }
 
     IEnumerator ScanNetworks() {
-        //Instantiate(scanIcon, lastPosition, Quaternion.identity);
+        Instantiate(scanIcon, new Vector3(lastPosition.x, 0, lastPosition.z), Quaternion.Euler(90, 0, 0));
         totalScans++;
         if (wifiManager == null) yield return null;
 
@@ -113,7 +113,6 @@ public class FindNetworks : MonoBehaviour
         if (scanDataList.Count >= maxScans)
         {
             CalculateCenter();
-            //scanDataList.Clear(); // Clear the list for new scans
             yield return null;
         }
         yield return null;
@@ -122,43 +121,26 @@ public class FindNetworks : MonoBehaviour
     void CalculateCenter()
     {
         // Assuming all scans detect the same networks
-        Dictionary<string, List<Vector2>> networkPositions = new Dictionary<string, List<Vector2>>();
-        Dictionary<string, List<NetworkData>> newList = new Dictionary<string, List<NetworkData>>();
+        Dictionary<string, List<NetworkData>> networksList = new Dictionary<string, List<NetworkData>>();
 
         foreach (var scanData in scanDataList)
         {
             foreach (var network in scanData.networks)
             {
-                if (!networkPositions.ContainsKey(network.Key))
+                if (!networksList.ContainsKey(network.Key))
                 {
-                    networkPositions[network.Key] = new List<Vector2>();
-                    newList[network.Key] = new List<NetworkData>();
+                    networksList[network.Key] = new List<NetworkData>();
                 }
 
-                // Convert RSSI to distance
-                float distance = RssiToDistance(network.Value);
-                Vector2 position2D = new Vector2(scanData.position.x, scanData.position.z);
-                networkPositions[network.Key].Add(position2D + (Vector2.one * distance));
-
                 NetworkData newPos = new NetworkData();
-                newPos.position = position2D;
+                newPos.position = new Vector2(scanData.position.x, scanData.position.z);
                 newPos.distance = RssiToDistance(network.Value);
-                newList[network.Key].Add(newPos);
+
+                networksList[network.Key].Add(newPos);
             }
         }
 
-        /*foreach (var network in networkPositions)
-        {
-            if (network.Value.Count > 3) // Must have at least 4 points
-            {
-                Vector2 center = WeightedCentroid(network.Value);
-                Debug.Log($"Calculated center for network {network.Key}: {center}");
-                
-                PlaceLocationMarker(network.Key, center);
-            }
-        }*/
-
-        foreach (var network in newList)
+        foreach (var network in networksList)
         {
             if (network.Value.Count > 3) // Must have at least 4 points
             {
@@ -169,17 +151,6 @@ public class FindNetworks : MonoBehaviour
             }
             
         }
-
-        /*foreach (var network in newList)
-        {
-            int size = network.Value.Count;
-            Vector2 center = Trilaterate(network.Value[size-1].position, network.Value[size-1].distance, network.Value[size-2].position, network.Value[size-2].distance, network.Value[size-3].position, network.Value[size-3].distance);
-
-            if (center != Vector2.zero)
-            {
-                PlaceLocationMarker(network.Key, center);
-            }
-        }*/
     }
 
     float RssiToDistance(int rssi)
@@ -194,36 +165,7 @@ public class FindNetworks : MonoBehaviour
         float distance = Mathf.Pow(10, (A - rssi) / (10 * n));
         return distance;
     }
-
-    Vector3 WeightedCentroid(List<Vector2> positions)
-    {
-        // Simple averaging for trilateration
-        Vector2 sum = Vector2.zero;
-        foreach (var position in positions)
-        {
-            sum += position;
-        }
-
-        return sum / positions.Count;
-    }
-
-    /*Vector3 FindCenter(List<NetworkData> data)
-    {
-        float totalX = 0;
-        float totalY = 0;
-        float total = 0;
-        foreach (var d in data) {
-            float n = d.distance + 100f;
-            if (n < 0) {
-                n = 0;
-            }
-            total += n;
-            totalX += d.position.x * n;
-            totalY += d.position.y * n;
-        }
-        return new Vector3(totalX/total, 0, totalY/total);
-    }*/
-
+    
     Vector2 FindCenter(List<NetworkData> data)
     {
         int count = data.Count;
@@ -249,29 +191,123 @@ public class FindNetworks : MonoBehaviour
 
         return new Vector2(x / totalWeight, y / totalWeight);
     }
-
-    // Uses last 3 values to calculate center of Network
-    Vector3 Trilaterate(Vector2 p1, float d1, Vector2 p2, float d2, Vector2 p3, float d3) {
-        float A = 2 * (p2.x - p1.x);
-        float B = 2 * (p2.y - p1.y);
-        float D = 2 * (p3.x - p1.x);
-        float E = 2 * (p3.y - p1.y);
+    Vector2 FindCenterTrilateration(List<NetworkData> data)
+    {
+        if (data.Count < 3) return Vector2.zero; // Need at least 3 points for trilateration
         
-        float C = d1 * d1 - d2 * d2 - p1.x * p1.x - p1.y * p1.y + p2.x * p2.x + p2.y * p2.y;
-        float F = d1 * d1 - d3 * d3 - p1.x * p1.x - p1.y * p1.y + p3.x * p3.x + p3.y * p3.y;
+        // Use last 3 points
+        Vector2 p1 = data[data.Count - 3].position;
+        Vector2 p2 = data[data.Count - 2].position;
+        Vector2 p3 = data[data.Count - 1].position;
 
-        float denominator = 2 * (A * E - B * D);
+        float r1 = data[data.Count - 3].distance;
+        float r2 = data[data.Count - 2].distance;
+        float r3 = data[data.Count - 1].distance;
 
-        if (denominator < 1e-6)
-        {
-            Debug.Log("The provided points are collinear or too close to being collinear.");
+        // Find the points of intersection
+        Vector2 intersection12a, intersection12b,
+                intersection23a, intersection23b,
+                intersection31a, intersection31b;
+
+        if (FindCircleCircleIntersections(p1, p2, r1, r2, out intersection12a, out intersection12b) == 0) {
+            Debug.Log("Failed at T1");
+            return Vector2.zero;
+        }
+        if (FindCircleCircleIntersections(p1, p3, r1, r3, out intersection23a, out intersection23b) == 0) {
+            Debug.Log("Failed at T2");
+            return Vector2.zero;
+        }
+        if (FindCircleCircleIntersections(p3, p2, r3, r2, out intersection31a, out intersection31b) == 0) {
+            Debug.Log("Failed at T3");
             return Vector2.zero;
         }
 
-        float x = (C * E - F * B) / denominator;
-        float y = (A * F - D * C) / denominator;
+        // Find the points that make up the target area.
+        Vector2[] triangle = new Vector2[3];
+        if (Distance(intersection12a, p3) <
+                Distance(intersection12b, p3))
+            triangle[0] = intersection12a;
+        else
+            triangle[0] = intersection12b;
+        if (Distance(intersection23a, p1) <
+                Distance(intersection23b, p1))
+            triangle[1] = intersection23a;
+        else
+            triangle[1] = intersection23b;
+        if (Distance(intersection31a, p2) <
+                Distance(intersection31b, p2))
+            triangle[2] = intersection31a;
+        else
+            triangle[2] = intersection31b;
 
-        return new Vector2 (x, y);
+        return FindTriangleCentroid(triangle[0], triangle[1], triangle[2]);
+    }
+
+    // Return the triangle's centroid.
+    private Vector2 FindTriangleCentroid(Vector2 p1, Vector2 p2, Vector2 p3)
+    {
+        return new Vector2(
+            (p1.x + p2.x + p3.x) / 3f,
+            (p1.y + p2.y + p3.y) / 3f);
+    }
+
+    private double Distance(Vector2 p1, Vector2 p2)
+    {
+        float dx = p1.x - p2.x;
+        float dy = p1.y - p2.y;
+        double dist = Math.Sqrt(dx*dx + dy*dy);
+        return dist;
+    }
+
+    int FindCircleCircleIntersections(Vector2 p1, Vector2 p2, float r1, float r2, out Vector2 intersection1, out Vector2 intersection2)
+    {
+        // Find the distance between the centers
+        float dx = p1.x - p2.x;
+        float dy = p1.y - p2.y;
+        double dist = Math.Sqrt(dx*dx + dy*dy);
+
+        // Find number of solutions
+        if (dist > r1 + r2)
+        {
+            intersection1 = new Vector2(float.NaN, float.NaN);
+            intersection2 = new Vector2(float.NaN, float.NaN);
+            return 0;
+        }
+        else if (dist < Math.Abs(r1 - r2))
+        {
+            intersection1 = new Vector2(float.NaN, float.NaN);
+            intersection2 = new Vector2(float.NaN, float.NaN);
+            return 0;
+        }
+        else if ((dist == 0) && (r1 == r2))
+        {
+            intersection1 = new Vector2(float.NaN, float.NaN);
+            intersection2 = new Vector2(float.NaN, float.NaN);
+            return 0;
+        }
+        else {
+            // Find a and h.
+            double a = (r1 * r1 - r2 * r2 + dist * dist) / (2 * dist);
+            double h = Math.Sqrt(r1 * r1 - a * a);
+
+            // Find P2.
+            double cx2 = p1.x + a * (p2.x - p1.x) / dist;
+            double cy2 = p1.y + a * (p2.y - p1.y) / dist;
+
+            // Get the points P3.
+            intersection1 = new Vector2(
+                (float)(cx2 + h * (p2.y - p1.y) / dist),
+                (float)(cy2 - h * (p1.x - p1.x) / dist));
+            intersection2 = new Vector2(
+                (float)(cx2 - h * (p2.y - p1.y) / dist),
+                (float)(cy2 + h * (p2.x - p1.x) / dist));
+
+            // See if we have 1 or 2 solutions.
+            if (dist == r1 + r2) return 1;
+            intersection1 = new Vector2(float.NaN, float.NaN);
+            intersection2 = new Vector2(float.NaN, float.NaN);
+            return 2;
+        }
     }
 
     void PlaceLocationMarker(string name, Vector2 position) {

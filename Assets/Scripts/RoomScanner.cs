@@ -5,7 +5,6 @@ public class RoomScanner : MonoBehaviour
 {
     public Transform origin; // The transform from which to cast the ray
     public GameObject cube; // The cube prefab to instantiate
-    public GameObject previewCubePrefab;
     public GameObject wallPrefab; // The wall prefab to instantiate
     public Material lineMaterial; // Material for the connecting lines
     public Material mapLineMaterial; // Material for map lines
@@ -26,8 +25,6 @@ public class RoomScanner : MonoBehaviour
     private LineRenderer currentMapLineRenderer; // Current thick line renderer
     private List<Vector3> currentPoints; // Points for the current group
 
-    private GameObject previewCube;
-
     private class WallConnection
     {
         public Vector3 Point1;
@@ -45,7 +42,6 @@ public class RoomScanner : MonoBehaviour
     void Start()
     {
         CreateNewLineRenderer();
-        CreatePreviewCube();
     }
 
     void Update()
@@ -74,9 +70,6 @@ public class RoomScanner : MonoBehaviour
         else if (OVRInput.GetDown(interruptLineButton))
         {
             CreateNewLineRenderer();
-        }
-        else {
-            UpdatePreviewCubePosition();
         }
     }
 
@@ -195,30 +188,6 @@ public class RoomScanner : MonoBehaviour
             }
         }
     }
-
-    void CreatePreviewCube()
-    {
-        previewCube = Instantiate(previewCubePrefab);
-        previewCube.SetActive(false); // Start with the preview cube disabled
-    }
-
-    void UpdatePreviewCubePosition()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(origin.position, origin.forward, out hit) && hit.transform.name == "MapBackground")
-        {
-            Vector3 hitPoint = hit.point;
-            Vector3 snappedPoint = GetSnappedPoint(hitPoint);
-
-            previewCube.transform.position = snappedPoint;
-            previewCube.SetActive(true); // Enable the preview cube
-        }
-        else
-        {
-            previewCube.SetActive(false); // Disable the preview cube if not hitting the plane
-        }
-    }
-
     void CreateNewLineRenderer()
     {
         currentLineRenderer = new GameObject("LineRenderer").AddComponent<LineRenderer>();
