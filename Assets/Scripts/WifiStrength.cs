@@ -13,6 +13,8 @@ public class WifiStrength : MonoBehaviour
     public UpdateDataScreen updateDataScreen;
     public SignalMesh signalMesh;
 
+    public int ScanNumber { get; private set; } // Number of scans made
+
     // Strength
     public int Strength { get; private set; }
     public int MaxStrength { get; private set; }
@@ -31,15 +33,11 @@ public class WifiStrength : MonoBehaviour
     
     void Start()
     {
-        // Initialize Strength values
-        MaxStrength = -99;
-        MinStrength = 0;
-        GetSignalStrength();
+        ScanNumber = 1;
 
-        // Initialize Speed values
-        Speed = 0;
-        MaxSpeed = 0;
-        MinSpeed = -1;
+        // Initialize Strength and Speed values
+        ResetWifiStats();
+        GetSignalStrength();
         StartCoroutine(GetSpeed());
 
         using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
@@ -50,8 +48,6 @@ public class WifiStrength : MonoBehaviour
 
         // Request necessary permissions
         RequestPermissions();
-
-        // ScanForNetworks();
     }
 
     public int GetSignalStrength()
@@ -238,6 +234,24 @@ public class WifiStrength : MonoBehaviour
         AvgSpeed = MathF.Round(totalSpeed / totalSpeedCount * 100f)/100f; // Round with 2 decimal places
     }
 
+    public void ResetWifiStats()
+    {
+        ScanNumber++;
+
+        // Strength
+        MaxStrength = -99;
+        MinStrength = 0;
+        AvgStrength = 0;
+        totalStrength = 0;
+        totalStrengthCount = 0;
+
+        // Speed
+        MaxSpeed = 0;
+        MinSpeed = -1;
+        AvgSpeed = 0;
+        totalSpeed = 0;
+        totalSpeedCount = 0;
+    }
 
     void RequestPermissions()
     {

@@ -33,14 +33,13 @@ public class SendData : MonoBehaviour
 
     public async void SendDataToServerAsync()
     {
+        int scan_number = wifiStrength.ScanNumber;
         string wifi_name = wifiStrength.GetWifiName();
         // Strength values
-        int wifi_strength = wifiStrength.Strength;
         int wifi_max_strength = wifiStrength.MaxStrength;
         int wifi_min_strength = wifiStrength.MinStrength;
         string wifi_avg_strength = wifiStrength.AvgStrength + "";
         // Speed values
-        int wifi_speed = (int)wifiStrength.Speed;
         int wifi_max_speed = (int)wifiStrength.MaxSpeed;
         int wifi_min_speed = (int)wifiStrength.MinSpeed;
         string wifi_avg_speed = wifiStrength.AvgSpeed + "";
@@ -53,14 +52,13 @@ public class SendData : MonoBehaviour
 
         // Create form and add fields
         WWWForm form = new WWWForm();
+        form.AddField("scan_number", scan_number);
         form.AddField("wifi_name", wifi_name);
         // Strength
-        form.AddField("wifi_strength", wifi_strength);
         form.AddField("wifi_max_strength", wifi_max_strength);
         form.AddField("wifi_min_strength", wifi_min_strength);
         form.AddField("wifi_avg_strength", wifi_avg_strength);
         // Speed
-        form.AddField("wifi_speed", wifi_speed);
         form.AddField("wifi_max_speed", wifi_max_speed);
         form.AddField("wifi_min_speed", wifi_min_speed);
         form.AddField("wifi_avg_speed", wifi_avg_speed);

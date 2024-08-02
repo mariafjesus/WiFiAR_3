@@ -11,6 +11,7 @@ public class HandMap : MonoBehaviour
     public Transform leftHand; // Reference to the left hand/controller Transform
     public GameObject mapCursor;
     public SignalMesh signalMesh;
+    public WifiStrength wifiStrength;
     public GameObject confirmResetDialog;
 
     public RenderTexture mapRenderTexture; // Reference to the RenderTexture
@@ -118,6 +119,7 @@ public class HandMap : MonoBehaviour
         if (confirmedReset == 1)
         {
             signalMesh.ResetSignalMesh();
+            wifiStrength.ResetWifiStats();
         }
 
         confirmResetDialog.SetActive(false);

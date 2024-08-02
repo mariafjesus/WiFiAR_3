@@ -6045,6 +6045,7 @@ MonoBehaviour:
   leftHand: {fileID: 352404487}
   mapCursor: {fileID: 507895169}
   signalMesh: {fileID: 1872975715}
+  wifiStrength: {fileID: 730769971}
   confirmResetDialog: {fileID: 1130938492}
   mapRenderTexture: {fileID: 8400000, guid: 7f72feb349d786842b1efe610a255cdf, type: 2}
   roomsRenderTexture: {fileID: 8400000, guid: 5d988e94112c4524bb389188a81a5e22, type: 2}
