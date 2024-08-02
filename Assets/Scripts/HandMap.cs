@@ -1,12 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
-using Meta.XR.Locomotion.Teleporter;
 using System.Threading.Tasks;
-using UnityEngine.Rendering;
-using System.Data;
 
 public class HandMap : MonoBehaviour
 {
@@ -14,13 +10,18 @@ public class HandMap : MonoBehaviour
     public GameObject handMap;
     public Transform leftHand; // Reference to the left hand/controller Transform
     public GameObject mapCursor;
+    public SignalMesh signalMesh;
+    public GameObject confirmResetDialog;
 
     public RenderTexture mapRenderTexture; // Reference to the RenderTexture
     public RenderTexture roomsRenderTexture; // Reference to the RenderTexture
     public RawImage rawImage; // Reference to the RawImage UI element
 
+    private int confirmedReset = 0;
+
     void Start() {
         rawImage.enabled = false;
+        confirmResetDialog.SetActive(false);
     }
 
     void Update()
@@ -101,5 +102,38 @@ public class HandMap : MonoBehaviour
 
     public void ShowWalls() {
         rawImage.enabled = true;
+    }
+
+    public void ResetScanWrapper() {
+        StartCoroutine(ResetScan());
+    }
+    public IEnumerator ResetScan()
+    {
+        confirmedReset = 0;
+        // Show confirmation dialog
+        confirmResetDialog.SetActive(true);
+        
+        yield return new WaitUntil(ConfirmedReset); // Wait until confirmedReset is updated
+
+        if (confirmedReset == 1)
+        {
+            signalMesh.ResetSignalMesh();
+        }
+
+        confirmResetDialog.SetActive(false);
+
+        yield return null;
+    }
+
+    public void ResetYes() {
+        confirmedReset = 1;
+    }
+
+    public void ResetNo() {
+        confirmedReset = -1;
+    }
+
+    bool ConfirmedReset() {
+        return confirmedReset != 0;
     }
 }

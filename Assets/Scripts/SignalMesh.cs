@@ -280,4 +280,25 @@ public class SignalMesh : MonoBehaviour
         // Convert to JSON string
         return JsonConvert.SerializeObject(list);
     }
+
+    public void ResetSignalMesh()
+    {
+        // Reset Mesh
+        for (int v = 0; v < (xSize + 1) * (zSize + 1); v++)
+        {
+            vertices[v].y = 0; // Reset height
+            colors[v] = Color.clear; // Reset color
+        }
+        UpdateMesh();
+
+        // Reset Matrices values
+        for (int i = 0; i < xSize; i++)
+        {
+            for (int j = 0; j < zSize; j++)
+            {
+                signalStrengthValues[i, j] = 0;
+                signalSpeedValues[i, j] = 0;
+            }
+        }
+    }
 }
