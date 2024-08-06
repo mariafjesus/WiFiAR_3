@@ -85,13 +85,17 @@ public class FindNetworks : MonoBehaviour
         }
     }
 
-    IEnumerator ScanNetworks() {
-        Instantiate(scanIcon, new Vector3(lastPosition.x, 0, lastPosition.z), Quaternion.Euler(90, 0, 0));
+    IEnumerator ScanNetworks()
+    {
         totalScans++;
+
         if (wifiManager == null) yield return null;
 
         bool success = wifiManager.Call<bool>("startScan");
         if (!success) yield return null; // Couldn't start scan
+
+        // Place scan icon
+        Instantiate(scanIcon, new Vector3(lastPosition.x, 0, lastPosition.z), Quaternion.Euler(90, 0, 0));
 
         AndroidJavaObject wifiList = wifiManager.Call<AndroidJavaObject>("getScanResults");
         int size = wifiList.Call<int>("size");
@@ -113,14 +117,12 @@ public class FindNetworks : MonoBehaviour
         if (scanDataList.Count >= maxScans)
         {
             CalculateCenter();
-            yield return null;
         }
         yield return null;
     }
 
     void CalculateCenter()
     {
-        // Assuming all scans detect the same networks
         Dictionary<string, List<NetworkData>> networksList = new Dictionary<string, List<NetworkData>>();
 
         foreach (var scanData in scanDataList)
@@ -191,6 +193,8 @@ public class FindNetworks : MonoBehaviour
 
         return new Vector2(x / totalWeight, y / totalWeight);
     }
+
+    // Calculate center using trilateration
     Vector2 FindCenterTrilateration(List<NetworkData> data)
     {
         if (data.Count < 3) return Vector2.zero; // Need at least 3 points for trilateration
@@ -243,7 +247,7 @@ public class FindNetworks : MonoBehaviour
         return FindTriangleCentroid(triangle[0], triangle[1], triangle[2]);
     }
 
-    // Return the triangle's centroid.
+    // Return the triangle's center
     private Vector2 FindTriangleCentroid(Vector2 p1, Vector2 p2, Vector2 p3)
     {
         return new Vector2(
@@ -310,7 +314,8 @@ public class FindNetworks : MonoBehaviour
         }
     }
 
-    void PlaceLocationMarker(string name, Vector2 position) {
+    void PlaceLocationMarker(string name, Vector2 position)
+    {
         if (locationMarkers.ContainsKey(name)) {
             // Update the position of the marker
             locationMarkers[name].transform.position = new Vector3(position.x, 0, position.y);

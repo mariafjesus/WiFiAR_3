@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.IO;
@@ -8,8 +7,9 @@ public class SendData : MonoBehaviour
 {
     public float timeInterval = 5f;
     private float timer;
+
     // Casa: 192.168.1.103
-    // Altice: 192.168.1.64 ET5002359.home
+    // Altice: 192.168.1.64 or ET5002359.home
     private string url = "http://" + "192.168.1.103" + ":5000/receive_data"; // Flask server URL
     public WifiStrength wifiStrength;
     public HandMap handMap;

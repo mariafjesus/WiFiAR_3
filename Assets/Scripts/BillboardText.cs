@@ -1,11 +1,11 @@
 using UnityEngine;
-using System.Collections;
 
 public class BillboardText : MonoBehaviour
 {
     private GameObject mainCamera;
 
-    void Start() {
+    void Start()
+    {
         mainCamera = GameObject.Find("CenterEyeAnchor");
     }
     

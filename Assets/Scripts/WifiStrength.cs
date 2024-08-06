@@ -58,6 +58,7 @@ public class WifiStrength : MonoBehaviour
         Debug.Log("Wifi Signal: " + wifiInfo.Call<int>("getRssi"));
         int strength = wifiInfo.Call<int>("getRssi");
         updateStrength(strength);
+
         return strength;
     }
 
@@ -74,106 +75,9 @@ public class WifiStrength : MonoBehaviour
         }
         return wifiName;
     }
-    public string ScanForNetworks()
+
+    public IEnumerator GetSpeed()
     {
-
-        if (wifiManager == null) return "Network 0";
-
-        bool success = wifiManager.Call<bool>("startScan");
-        AndroidJavaObject scanResults = wifiManager.Call<AndroidJavaObject>("getScanResults");
-        int size = scanResults.Call<int>("size");
-
-        string n = "";
-        for (int i = 0; i < size; i++)
-        {
-            AndroidJavaObject scanResult = scanResults.Call<AndroidJavaObject>("get", i);
-            string ssid = scanResult.Get<string>("SSID");
-            int rssi = scanResult.Get<int>("level");
-
-            Debug.Log($"Network: {ssid}, Signal Strength: {rssi} dBm");
-            n += "Network: " + ssid + ", Signal Strength: " + rssi + " dBm";
-            
-        }
-        return success + " " + n;
-    }
-
-    public List<string> GetAvailableNetworks()
-    {
-        List<string> networks = new List<string>();
-        if (wifiManager == null) return networks;
-
-        bool success = wifiManager.Call<bool>("startScan");
-        AndroidJavaObject wifiList = wifiManager.Call<AndroidJavaObject>("getScanResults");
-
-        int size = wifiList.Call<int>("size");
-        networks.Add(""+success);
-        for (int i = 0; i < size; i++)
-        {
-            AndroidJavaObject scanResult = wifiList.Call<AndroidJavaObject>("get", i);
-            string ssid = scanResult.Get<string>("SSID");
-            int rssi = scanResult.Get<int>("level");
-            if (!string.IsNullOrEmpty(ssid) && !networks.Contains(ssid))
-            {
-                networks.Add(rssi + " " + ssid);
-            }
-        }
-        return networks;
-    }
-
-    public List<string> GetPreviouslyConnectedNetworks()
-    {
-        
-        List<string> networkList = new List<string>();
-        if (wifiManager == null)
-        {
-            networkList.Add("null");
-            return networkList;
-        }
-
-        AndroidJavaObject configuredNetworks = wifiManager.Call<AndroidJavaObject>("getConfiguredNetworks");
-        int networkCount = configuredNetworks.Call<int>("size");
-
-        for (int i = 0; i < networkCount; i++)
-        {
-            AndroidJavaObject network = configuredNetworks.Call<AndroidJavaObject>("get", i);
-            string ssid = network.Get<string>("SSID");
-
-            if (ssid.StartsWith("\"") && ssid.EndsWith("\""))
-            {
-                ssid = ssid.Substring(1, ssid.Length - 2);
-            }
-
-            networkList.Add(ssid);
-        }
-        networkList.Add("Empty");
-
-        return networkList;
-    }
-
-    public bool ConnectToNetwork(string ssid)
-    {
-        if (wifiManager == null) return false;
-
-        AndroidJavaObject configuredNetworks = wifiManager.Call<AndroidJavaObject>("getConfiguredNetworks");
-        int networkCount = configuredNetworks.Call<int>("size");
-
-        for (int i = 0; i < networkCount; i++)
-        {
-            AndroidJavaObject network = configuredNetworks.Call<AndroidJavaObject>("get", i);
-            string networkSSID = network.Get<string>("SSID");
-
-            if (networkSSID.Equals("\"" + ssid + "\""))
-            {
-                int networkId = network.Get<int>("networkId");
-                bool result = wifiManager.Call<bool>("enableNetwork", networkId, true);
-                return result;
-            }
-        }
-
-        return false;
-    }
-
-    public IEnumerator GetSpeed() {
         string uri = "https://lisboa.speedtest.net.zon.pt.prod.hosts.ooklaserver.net:8080/download?nocache=1e75a1a4-1969-489b-8fa7-f7cdd9e2f599&size=25000000&guid=06ff9720-e905-44e7-b589-ecdcfd4154e4";
         
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
@@ -199,7 +103,8 @@ public class WifiStrength : MonoBehaviour
         }
     }
 
-    void updateStrength(int s) {
+    void updateStrength(int s)
+    {
         Strength = s;
         // Max
         if (Strength > MaxStrength) {
@@ -215,7 +120,8 @@ public class WifiStrength : MonoBehaviour
         AvgStrength = MathF.Round(totalStrength / totalStrengthCount * 100f)/100f; // Round with 2 decimal places
     }
 
-    void updateSpeed(float s) {
+    void updateSpeed(float s)
+    {
         // Add to matrix
         signalMesh.addSpeed((int)s);
 

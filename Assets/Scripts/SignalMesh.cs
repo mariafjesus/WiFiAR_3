@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System;
-using Unity.VisualScripting;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class SignalMesh : MonoBehaviour
@@ -18,7 +16,6 @@ public class SignalMesh : MonoBehaviour
     public int zSize = 40;
     public float vertexSpacing = 0.5f; // Spacing between vertices
     public float timeInterval = 0.5f; // Time between mesh updates
-    // public float interpolationFactor = 0.5f; // Determines how quickly the mesh adapts to new heigth values
     public float interpolationDistance = 0.5f; // Radius of interpolation
     public Gradient gradient;
 
@@ -53,12 +50,12 @@ public class SignalMesh : MonoBehaviour
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
-        // Set the map camera heigth to see all the mesh
+        // Set the map cameras height to see all the mesh
         if (mapCamera != null && roomsCamera != null) {
             mapCamera.orthographicSize = xSize * vertexSpacing / 2;
             roomsCamera.orthographicSize = xSize * vertexSpacing / 2;
         }
-        // Resize background plane to fill the map
+        // Resize background plane to fill all the map
         if (mapBackground != null) {
             mapBackground.transform.localScale = new Vector3(xSize * vertexSpacing + 1, 1f, zSize * vertexSpacing + 1);
         }
@@ -112,7 +109,7 @@ public class SignalMesh : MonoBehaviour
 
         for (int i = 0; i < colors.Length; i++)
         {
-            colors[i] = Color.clear; // Initialize with the lowest value of the gradient
+            colors[i] = Color.clear; // Initialize with transparent vertices
         }
     }
 
@@ -129,7 +126,6 @@ public class SignalMesh : MonoBehaviour
 
     void Update()
     {
-        // If centerEyeAnchorTransform is not assigned, return
         if (centerEyeAnchorTransform == null)
         {
             Debug.LogWarning("CenterEyeAnchorTransform is not assigned.");
@@ -226,6 +222,7 @@ public class SignalMesh : MonoBehaviour
         float relativeX = userPosition.x - transform.position.x - minX;
         return relativeX;
     }
+
     int GetXIndex()
     {
         float relativeX = GetRelativeX();
@@ -248,7 +245,8 @@ public class SignalMesh : MonoBehaviour
         return zIndex;
     }
 
-    public void addSpeed(int speed) {
+    public void addSpeed(int speed)
+    {
         // Add speed value to matrix, the function is called when a new speed value is calculated
         signalSpeedValues[GetXIndex(),GetZIndex()] = speed;
     }

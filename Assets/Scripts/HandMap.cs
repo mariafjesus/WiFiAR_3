@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 public class HandMap : MonoBehaviour
 {
-    public GameObject screen; // Reference to the screen GameObject
+    public GameObject screen; // Reference to the canvas
     public GameObject handMap;
-    public Transform leftHand; // Reference to the left hand/controller Transform
+    public Transform leftHand;
     public GameObject mapCursor;
     public SignalMesh signalMesh;
     public WifiStrength wifiStrength;
     public GameObject confirmResetDialog;
 
-    public RenderTexture mapRenderTexture; // Reference to the RenderTexture
-    public RenderTexture roomsRenderTexture; // Reference to the RenderTexture
-    public RawImage rawImage; // Reference to the RawImage UI element
+    public RenderTexture mapRenderTexture;
+    public RenderTexture roomsRenderTexture;
+    public RawImage rawImage; // Reference to the RawImage with the walls image
 
     private int confirmedReset = 0;
 
@@ -39,7 +39,7 @@ public class HandMap : MonoBehaviour
             {
                 // Using hands
                 handMap.transform.rotation = leftHand.rotation * Quaternion.Euler(75, 90, 0);
-                handMap.transform.position = leftHand.position + /*X*/ leftHand.right * 0.1f + /*Y*/leftHand.up * 0.05f + /*Z*/ leftHand.forward * -0.18f;
+                handMap.transform.position = leftHand.position + /*X*/ leftHand.right * 0.1f + /*Y*/ leftHand.up * 0.05f + /*Z*/ leftHand.forward * -0.18f;
             }
             else
             {
@@ -58,6 +58,7 @@ public class HandMap : MonoBehaviour
 
     public async Task<string> SaveImageAsync(RenderTexture renderTexture, string filename, bool hide_cursor)
     {
+        // Hide map cursor for picture
         if (hide_cursor)
         {
             mapCursor.SetActive(false);

@@ -16,7 +16,7 @@ PlayerSettings:
   productName: WiFi AR
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
-  m_SplashScreenBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_SplashScreenBackgroundColor: {r: 0, g: 0.06657175, b: 0.16037738, a: 1}
   m_ShowUnitySplashScreen: 1
   m_ShowUnitySplashLogo: 1
   m_SplashScreenOverlayOpacity: 1
@@ -450,43 +450,43 @@ PlayerSettings:
       m_Kind: 1
       m_SubKind: 
     - m_Textures:
-      - {fileID: 2800000, guid: 9310a6124cf3d8d49aadb14a3220ebeb, type: 3}
-      - {fileID: 2800000, guid: 7a9a403941b2a4f479b5c2a0d77a89c3, type: 3}
+      - {fileID: 2800000, guid: d7e112fe4702df24ab1b76ce05043d82, type: 3}
+      - {fileID: 2800000, guid: 0ec2adfff9f67774f97e5cf764fb6702, type: 3}
       m_Width: 432
       m_Height: 432
       m_Kind: 2
       m_SubKind: 
     - m_Textures:
-      - {fileID: 2800000, guid: 9310a6124cf3d8d49aadb14a3220ebeb, type: 3}
-      - {fileID: 2800000, guid: 7a9a403941b2a4f479b5c2a0d77a89c3, type: 3}
+      - {fileID: 2800000, guid: d7e112fe4702df24ab1b76ce05043d82, type: 3}
+      - {fileID: 2800000, guid: 0ec2adfff9f67774f97e5cf764fb6702, type: 3}
       m_Width: 324
       m_Height: 324
       m_Kind: 2
       m_SubKind: 
     - m_Textures:
-      - {fileID: 2800000, guid: 9310a6124cf3d8d49aadb14a3220ebeb, type: 3}
-      - {fileID: 2800000, guid: 7a9a403941b2a4f479b5c2a0d77a89c3, type: 3}
+      - {fileID: 2800000, guid: 6cea43a4e4eeb1e428966db9b3c62b35, type: 3}
+      - {fileID: 2800000, guid: 1d81177179acaa0469f884337c7f5523, type: 3}
       m_Width: 216
       m_Height: 216
       m_Kind: 2
       m_SubKind: 
     - m_Textures:
-      - {fileID: 2800000, guid: 9310a6124cf3d8d49aadb14a3220ebeb, type: 3}
-      - {fileID: 2800000, guid: 7a9a403941b2a4f479b5c2a0d77a89c3, type: 3}
+      - {fileID: 2800000, guid: 6cea43a4e4eeb1e428966db9b3c62b35, type: 3}
+      - {fileID: 2800000, guid: 1d81177179acaa0469f884337c7f5523, type: 3}
       m_Width: 162
       m_Height: 162
       m_Kind: 2
       m_SubKind: 
     - m_Textures:
-      - {fileID: 2800000, guid: 9310a6124cf3d8d49aadb14a3220ebeb, type: 3}
-      - {fileID: 2800000, guid: 7a9a403941b2a4f479b5c2a0d77a89c3, type: 3}
+      - {fileID: 2800000, guid: 6cea43a4e4eeb1e428966db9b3c62b35, type: 3}
+      - {fileID: 2800000, guid: 1d81177179acaa0469f884337c7f5523, type: 3}
       m_Width: 108
       m_Height: 108
       m_Kind: 2
       m_SubKind: 
     - m_Textures:
-      - {fileID: 2800000, guid: 9310a6124cf3d8d49aadb14a3220ebeb, type: 3}
-      - {fileID: 2800000, guid: 7a9a403941b2a4f479b5c2a0d77a89c3, type: 3}
+      - {fileID: 2800000, guid: 6cea43a4e4eeb1e428966db9b3c62b35, type: 3}
+      - {fileID: 2800000, guid: 1d81177179acaa0469f884337c7f5523, type: 3}
       m_Width: 81
       m_Height: 81
       m_Kind: 2

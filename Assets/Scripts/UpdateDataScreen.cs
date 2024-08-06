@@ -1,23 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using UnityEngine.Networking;
 
 public class UpdateDataScreen : MonoBehaviour
 {
-    public TextMeshProUGUI wifiNameText; // Reference to the Text
-    public float nameTimeInterval = 60f; // Time between updates
+    // Wifi Name
+    public TextMeshProUGUI wifiNameText;
+    public float nameTimeInterval = 60f;
     
-    public TextMeshProUGUI wifiStrengthText; // Reference to the Text
-    public float textTimeInterval = 0.5f; // Time between updates
+    // Wifi Strength
+    public TextMeshProUGUI wifiStrengthText;
+    public float textTimeInterval = 0.5f;
 
-    public TextMeshProUGUI wifiSpeedText; // Reference to the Text
-    public float speedTextTimeInterval = 2f; // Time between updates
+    // Wifi Speed
+    public TextMeshProUGUI wifiSpeedText;
+    public float speedTextTimeInterval = 2f;
 
-    public TMP_Text text;
-
-    public TextMeshProUGUI FPSText; // Reference to the Text
+    public TextMeshProUGUI FPSText; // FPS text label
 
     private float nameTimer;
     private float textTimer;
@@ -25,7 +23,8 @@ public class UpdateDataScreen : MonoBehaviour
     public WifiStrength wifiStrength;
     int fps = 0;
 
-    void Start() {
+    void Start()
+    {
         if (wifiStrengthText == null)
         {
             Debug.LogError("UI Text reference is not set.");
@@ -35,8 +34,10 @@ public class UpdateDataScreen : MonoBehaviour
         UpdateWifiName();
     }
 
-    void Update() {
-        textTimer += Time.deltaTime; // Only update after a given time interval
+    void Update()
+    {
+        // Only update after a given time interval
+        textTimer += Time.deltaTime;
         if (textTimer >= textTimeInterval)
         {
             UpdateSignalStrength();
@@ -44,21 +45,21 @@ public class UpdateDataScreen : MonoBehaviour
             textTimer = 0f;
         }
 
-        speedTextTimer += Time.deltaTime; // Only update after a given time interval
+        speedTextTimer += Time.deltaTime;
         if (speedTextTimer >= speedTextTimeInterval)
         {
             StartCoroutine(wifiStrength.GetSpeed());
             speedTextTimer = 0f;
         }
 
-        nameTimer += Time.deltaTime; // Only update after a given time interval
+        nameTimer += Time.deltaTime;
         if (nameTimer >= nameTimeInterval)
         {
             UpdateWifiName();
             nameTimer = 0f;
         }
 
-        fps = (int)(1f / Time.unscaledDeltaTime);
+        fps = (int)(1f / Time.unscaledDeltaTime); // Calculate FPS
     }
 
     public void UpdateWifiName()
@@ -76,8 +77,6 @@ public class UpdateDataScreen : MonoBehaviour
         {
             int signalStrength = wifiStrength.GetSignalStrength();
             wifiStrengthText.text = signalStrength + " dBm";
-            //string signalStrength = wifiStrength.ScanForNetworks();
-            //wifiStrengthText.text = signalStrength;
         }
     }
 
